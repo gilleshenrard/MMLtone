@@ -36,7 +36,7 @@
 #define BPM140INT 26784 // 37.333Hz tick (1/64 note at 140 BPM)
 #define BPM160INT 23436 // 42.667Hz tick (1/64 note at 160 BPM)
 
-MMLtone melody = MMLtone(12, "5d8 e f g f e d c d e f g f e d c d e f g f e4 d8 g f e d c");
+MMLtone melody = MMLtone(12, "4D4 G2 G8 B8 A8 B8 G2./ G4 A2/ A8/ A8 G8 A8 B4 G4/ G4 D4 G2 G8 B8 A8 B8 G2. B4 A4 5C4 4B4 A4 G4");
 
 
 /****************************************************************************/

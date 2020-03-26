@@ -7,7 +7,7 @@
  * O : /                                                        *
  ****************************************************************/
 MMLtone::MMLtone(unsigned char Pin, const char* music)
-:isFinished(false), lastnote(false), isStarted(false), m_curNote(NULL), m_nextNote(NULL), m_octave(0), m_nbtick(0), m_duration(0)
+:isFinished(false), lastnote(false), isStarted(false), cut_note(false), m_curNote(NULL), m_nextNote(NULL), m_octave(0), m_nbtick(0), m_duration(0)
 {
   this->pin = Pin;
   this->m_music = music;
@@ -51,6 +51,10 @@ int MMLtone::onTick()
     if(!this->isStarted)
       return 0;
 
+    //if note is to be cut, noTone() during the last tick
+    if(this->cut_note && this->m_nbtick == 1)
+      noTone(this->pin);
+
     //check if note is still to be played
     if(this->m_nbtick > 0)
     {
@@ -60,6 +64,10 @@ int MMLtone::onTick()
 
 
     //NOTE POINTERS UPDATE
+
+
+    //reinitialise the note nut flag
+    this->cut_note = false;
 
     //update pointers to get the new current and next notes
     if(!this->m_curNote)
@@ -197,7 +205,14 @@ int MMLtone::onTick()
 
     //decode dotted note (duration * 1.5)
     if (*it == '.')
+    {
         this->m_nbtick = (unsigned char)((float)this->m_nbtick * 1.5);
+        it++;
+    }
+
+    //if note is to be cut (ends with '/'), set the flag to noTone() for the last tick
+    if (*it == '/')
+        this->cut_note = true;
 
     //decrement tick count (1 cycle is used to refresh note)
     this->m_nbtick--;

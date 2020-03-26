@@ -9,6 +9,7 @@ class MMLtone
       bool            isFinished;
       bool            lastnote;
       bool            isStarted;
+      bool            cut_note;
       char*           m_curNote;
       char*           m_nextNote;
       char*           m_music;
