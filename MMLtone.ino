@@ -55,12 +55,7 @@ void setup() {
   Serial.begin(9600);
   
   //setup melody and pin 13 (test led)
-  do
-  {
-    notebuffer[noteindex] = pgm_read_word_near(melodycode + noteindex);
-    noteindex++;
-  }while(noteindex<8 && notebuffer[noteindex-1]!=' ');
-  notebuffer[noteindex] = '\0';
+  melody.getNextNote(&noteindex, notebuffer, melodycode, notesize);
   melody.setup();
   
   //clear TCCR1
@@ -96,14 +91,7 @@ ISR(TIMER1_COMPA_vect){
   if(!melody.refreshed())
     return;
 
-  unsigned char i=0;
-  do
-  {
-    notebuffer[i] = pgm_read_word_near(melodycode + noteindex);
-    noteindex++;
-    i++;
-  }while(noteindex < notesize && i<8 && notebuffer[i-1]!=' '&& notebuffer[i-1]!='\0');
-  notebuffer[i] = '\0';
+  melody.getNextNote(&noteindex, notebuffer, melodycode, notesize);
 }
 
 /****************************************************************************/

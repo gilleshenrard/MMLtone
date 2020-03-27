@@ -21,6 +21,7 @@ class MMLtone
       void setup();
       void start();
       int onTick(const char* nextnote);
+      void getNextNote(unsigned char* index, char buf[], const char melody[], const unsigned char notesize);
       void stop();
       void reset();
 

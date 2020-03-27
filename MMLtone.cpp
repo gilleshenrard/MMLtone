@@ -2,7 +2,6 @@
 
 /****************************************************************
  * I : Pin on which the buzzer is plugged                       *
- *     MML music code to play                                   *
  * P : Builds a new MMLtone module                              *
  * O : /                                                        *
  ****************************************************************/
@@ -40,7 +39,7 @@ void MMLtone::start(){
 }
 
 /****************************************************************/
-/*  I : /                                                       */
+/*  I : Next note to play                                       */
 /*  P : When a tick is reached, decode a note and play it       */
 /*  O : /                                                       */
 /****************************************************************/
@@ -54,6 +53,7 @@ int MMLtone::onTick(const char* nextnote)
     if(this->cut_note && this->m_nbtick == 1)
       noTone(this->pin);
 
+    //on first tick, clear the flag indicating next note is to be decoded
     if(this->m_nbtick >= (64 / this->m_duration) - 1)
       this->isRefreshed = false;
 
@@ -144,6 +144,7 @@ int MMLtone::onTick(const char* nextnote)
     }
 
     //play the note
+    // + set the flag to decode next note on 2nd tick
     tone(this->pin, frequency);
     this->isRefreshed = true;
 
@@ -189,6 +190,27 @@ int MMLtone::onTick(const char* nextnote)
     this->m_nbtick--;
 
     return 0;
+}
+
+/****************************************************************/
+/*  I : index in the MML array                                  */
+/*      buffer to which copy the next note                      */
+/*      melody from which decode the next note                  */
+/*      complete size of the MML array                          */
+/*  P : Fetches the next note in memory and loads in in the buf.*/
+/*  O : /                                                       */
+/****************************************************************/
+void MMLtone::getNextNote(unsigned char* index, char buf[], const char melody[], const unsigned char notesize){
+  unsigned char i=0;
+
+  //read the EEPROM memory byte by byte to retrieve the next note
+  do
+  {
+    buf[i] = pgm_read_word_near(melody + *index);
+    *index += 1;
+    i++;
+  }while(*index < notesize && i<8 && buf[i-1]!=' '&& buf[i-1]!='\0');
+  buf[i] = '\0';
 }
 
 /****************************************************************
