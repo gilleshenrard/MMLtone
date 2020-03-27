@@ -37,10 +37,8 @@
 #define BPM160INT 23436 // 42.667Hz tick (1/64 note at 160 BPM)
 
 const char melodycode[] PROGMEM = {"4D4 G2 G8 B8 A8 B8 G2./ G4 A2/ A8/ A8 G8 A8 B4 G4/ G4 D4 G2 G8 B8 A8 B8 G2. B4 A4 5C4 4B4 A4 G4"};
-char notebuffer[8] = {0};
-unsigned char noteindex = 0;
 
-MMLtone melody = MMLtone(12);
+MMLtone melody = MMLtone(12, melodycode, sizeof(melodycode));
 
 
 /****************************************************************************/
@@ -55,7 +53,6 @@ void setup() {
   Serial.begin(9600);
   
   //setup melody and pin 13 (test led)
-  melody.getNextNote(&noteindex, notebuffer, melodycode, sizeof(melodycode));
   melody.setup();
   
   //clear TCCR1
@@ -87,11 +84,8 @@ ISR(TIMER1_COMPA_vect){
   //onTick() witout refresh : 20 us max
   //onTick() with refresh : 284 us max
 
-  melody.onTick(notebuffer);
-  if(!melody.refreshed())
-    return;
-
-  melody.getNextNote(&noteindex, notebuffer, melodycode, sizeof(melodycode));
+  melody.getNextNote();
+  melody.onTick();
 }
 
 /****************************************************************************/

@@ -5,10 +5,12 @@
  * P : Builds a new MMLtone module                              *
  * O : /                                                        *
  ****************************************************************/
-MMLtone::MMLtone(unsigned char Pin)
-:isFinished(false), lastnote(false), isStarted(false), cut_note(false), isRefreshed(false), m_octave(0), m_nbtick(0), m_duration(0)
+MMLtone::MMLtone(unsigned char Pin, const char* code, const unsigned char siz)
+:isFinished(false), lastnote(false), isStarted(false), cut_note(false), isRefreshed(false), m_octave(0), m_nbtick(0), m_duration(0), m_index(0), m_buffer{0}
 {
   this->pin = Pin;
+  this->m_code = code;
+  this->m_size = siz;
 }
 
 /****************************************************************
@@ -43,7 +45,7 @@ void MMLtone::start(){
 /*  P : When a tick is reached, decode a note and play it       */
 /*  O : /                                                       */
 /****************************************************************/
-int MMLtone::onTick(const char* nextnote)
+int MMLtone::onTick()
 {
     //if music is supposed to be stopped, exit
     if(!this->isStarted)
@@ -68,7 +70,7 @@ int MMLtone::onTick(const char* nextnote)
     //NOTE DECODING
 
     //get the code for the current note + declare all variables
-    char* it = nextnote;
+    char* it = this->m_buffer;
     float frequency;
     unsigned char duration = 0;
     
@@ -200,17 +202,20 @@ int MMLtone::onTick(const char* nextnote)
 /*  P : Fetches the next note in memory and loads in in the buf.*/
 /*  O : /                                                       */
 /****************************************************************/
-void MMLtone::getNextNote(unsigned char* index, char buf[], const char melody[], const unsigned char notesize){
+void MMLtone::getNextNote(){
+  if(this->m_index>0 && !this->isRefreshed)
+    return;
+  
   unsigned char i=0;
 
   //read the EEPROM memory byte by byte to retrieve the next note
   do
   {
-    buf[i] = pgm_read_word_near(melody + *index);
-    *index += 1;
+    this->m_buffer[i] = pgm_read_word_near(this->m_code + this->m_index);
+    this->m_index += 1;
     i++;
-  }while(*index < notesize && i<8 && buf[i-1]!=' '&& buf[i-1]!='\0');
-  buf[i] = '\0';
+  }while(this->m_index < this->m_size && i<NOTBUFSZ && this->m_buffer[i-1]!=' '&& this->m_buffer[i-1]!='\0');
+  this->m_buffer[i] = '\0';
 }
 
 /****************************************************************

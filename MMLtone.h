@@ -2,6 +2,8 @@
 #define MUSIC_H_INCLUDED
 #include <Arduino.h>
 
+#define NOTBUFSZ 8
+
 class MMLtone
 { 
   private:
@@ -14,14 +16,18 @@ class MMLtone
       unsigned char   m_octave;
       unsigned char   m_nbtick;
       unsigned char   m_duration;
+      unsigned char   m_index;
+      unsigned char   m_size;
+      char            m_buffer[NOTBUFSZ];
+      char*           m_code;
 
   public:
-      MMLtone(unsigned char Pin);
+      MMLtone(unsigned char Pin, const char* code, const unsigned char siz);
       ~MMLtone();
       void setup();
       void start();
-      int onTick(const char* nextnote);
-      void getNextNote(unsigned char* index, char buf[], const char melody[], const unsigned char notesize);
+      int onTick();
+      void getNextNote();
       void stop();
       void reset();
 
