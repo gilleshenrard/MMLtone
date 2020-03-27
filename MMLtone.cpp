@@ -2,6 +2,8 @@
 
 /****************************************************************
  * I : Pin on which the buzzer is plugged                       *
+ *     Pointer to the MML code array                            *
+ *     Size of the code array (sizeof())                        *
  * P : Builds a new MMLtone module                              *
  * O : /                                                        *
  ****************************************************************/
@@ -41,7 +43,7 @@ void MMLtone::start(){
 }
 
 /****************************************************************/
-/*  I : Next note to play                                       */
+/*  I : /                                                       */
 /*  P : When a tick is reached, decode a note and play it       */
 /*  O : /                                                       */
 /****************************************************************/
@@ -195,10 +197,7 @@ int MMLtone::onTick()
 }
 
 /****************************************************************/
-/*  I : index in the MML array                                  */
-/*      buffer to which copy the next note                      */
-/*      melody from which decode the next note                  */
-/*      complete size of the MML array                          */
+/*  I : /                                                       */
 /*  P : Fetches the next note in memory and loads in in the buf.*/
 /*  O : /                                                       */
 /****************************************************************/

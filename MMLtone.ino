@@ -81,8 +81,8 @@ void setup() {
 /*  O : /                                                                   */
 /****************************************************************************/
 ISR(TIMER1_COMPA_vect){
-  //onTick() witout refresh : 20 us max
-  //onTick() with refresh : 284 us max
+  //timing tests (in microseconds) : 
+  //20 <= onTick() + getNextNote() <= 280
 
   melody.getNextNote();
   melody.onTick();
