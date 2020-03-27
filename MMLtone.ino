@@ -38,7 +38,7 @@
 
 const char melodycode[] PROGMEM = {"4D4 G2 G8 B8 A8 B8 G2./ G4 A2/ A8/ A8 G8 A8 B4 G4/ G4 D4 G2 G8 B8 A8 B8 G2. B4 A4 5C4 4B4 A4 G4"};
 char notebuffer[8] = {0};
-unsigned char noteindex = 0, notesize=95;
+unsigned char noteindex = 0;
 
 MMLtone melody = MMLtone(12);
 
@@ -55,7 +55,7 @@ void setup() {
   Serial.begin(9600);
   
   //setup melody and pin 13 (test led)
-  melody.getNextNote(&noteindex, notebuffer, melodycode, notesize);
+  melody.getNextNote(&noteindex, notebuffer, melodycode, sizeof(melodycode));
   melody.setup();
   
   //clear TCCR1
@@ -91,7 +91,7 @@ ISR(TIMER1_COMPA_vect){
   if(!melody.refreshed())
     return;
 
-  melody.getNextNote(&noteindex, notebuffer, melodycode, notesize);
+  melody.getNextNote(&noteindex, notebuffer, melodycode, sizeof(melodycode));
 }
 
 /****************************************************************************/
