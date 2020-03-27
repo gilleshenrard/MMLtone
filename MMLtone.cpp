@@ -7,7 +7,7 @@
  * O : /                                                        *
  ****************************************************************/
 MMLtone::MMLtone(unsigned char Pin, const char* music)
-:isFinished(false), lastnote(false), isStarted(false), cut_note(false), m_curNote(NULL), m_nextNote(NULL), m_octave(0), m_nbtick(0), m_duration(0)
+:isFinished(false), lastnote(false), isStarted(false), cut_note(false), isRefreshed(false), m_curNote(NULL), m_nextNote(NULL), m_octave(0), m_nbtick(0), m_duration(0)
 {
   this->pin = Pin;
   this->m_music = music;
@@ -45,8 +45,9 @@ void MMLtone::start(){
 /*  P : When a tick is reached, decode a note and play it       */
 /*  O : /                                                       */
 /****************************************************************/
-int MMLtone::onTick()
-{ 
+int MMLtone::onTick(const char* nextnote)
+{
+    Serial.println("tick");
     //if music is supposed to be stopped, exit
     if(!this->isStarted)
       return 0;
@@ -54,6 +55,12 @@ int MMLtone::onTick()
     //if note is to be cut, noTone() during the last tick
     if(this->cut_note && this->m_nbtick == 1)
       noTone(this->pin);
+
+    if(this->m_nbtick >= (64 / this->m_duration) - 1)
+    {
+      Serial.println("refresh reset");
+      this->isRefreshed = false;
+    }
 
     //check if note is still to be played
     if(this->m_nbtick > 0)
@@ -66,9 +73,9 @@ int MMLtone::onTick()
     //NOTE POINTERS UPDATE
 
 
-    //reinitialise the note nut flag
+    //reinitialise the note cut flag
     this->cut_note = false;
-
+/*
     //update pointers to get the new current and next notes
     if(!this->m_curNote)
     {
@@ -95,13 +102,13 @@ int MMLtone::onTick()
     //check if current note the last one of the string
     if(*this->m_nextNote == '\0')
         this->lastnote = true;
-
+*/
 
 
     //NOTE DECODING
 
     //get the code for the current note + declare all variables
-    char* it = this->m_curNote;
+    char* it = nextnote;
     float frequency;
     unsigned char duration = 0;
 
@@ -175,6 +182,8 @@ int MMLtone::onTick()
 
     //play the note
     tone(this->pin, frequency);
+    Serial.println("Refresh set");
+    this->isRefreshed = true;
 
 
 
@@ -270,4 +279,14 @@ bool MMLtone::finished()
 bool MMLtone::last()
 {
   return this->lastnote;
+}
+
+/****************************************************************
+ * I : /                                                        *
+ * P : Informs about whether the last tone is reached or not    *
+ * O : Melody state                                             *
+ ****************************************************************/
+bool MMLtone::refreshed()
+{
+  return this->isRefreshed;
 }

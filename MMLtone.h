@@ -10,6 +10,7 @@ class MMLtone
       bool            lastnote;
       bool            isStarted;
       bool            cut_note;
+      bool            isRefreshed;
       char*           m_curNote;
       char*           m_nextNote;
       char*           m_music;
@@ -22,12 +23,13 @@ class MMLtone
       ~MMLtone();
       void setup();
       void start();
-      int onTick();
+      int onTick(const char* nextnote);
       void stop();
       void reset();
 
       bool started();
       bool finished();
       bool last();
+      bool refreshed();
 };
 #endif

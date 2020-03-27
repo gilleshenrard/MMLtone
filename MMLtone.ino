@@ -36,6 +36,10 @@
 #define BPM140INT 26784 // 37.333Hz tick (1/64 note at 140 BPM)
 #define BPM160INT 23436 // 42.667Hz tick (1/64 note at 160 BPM)
 
+const char melodycode[] PROGMEM = {"4D4 G2 G8 B8 A8 B8 G2./ G4 A2/ A8/ A8 G8 A8 B4 G4/ G4 D4 G2 G8 B8 A8 B8 G2. B4 A4 5C4 4B4 A4 G4"};
+char notebuffer[8] = {0};
+unsigned char noteindex = 0, notesize=95;
+
 MMLtone melody = MMLtone(12, "4D4 G2 G8 B8 A8 B8 G2./ G4 A2/ A8/ A8 G8 A8 B4 G4/ G4 D4 G2 G8 B8 A8 B8 G2. B4 A4 5C4 4B4 A4 G4");
 
 
@@ -47,8 +51,16 @@ MMLtone melody = MMLtone(12, "4D4 G2 G8 B8 A8 B8 G2./ G4 A2/ A8/ A8 G8 A8 B4 G4/
 void setup() {
   //stop interrupts
   cli();
+
+  Serial.begin(9600);
   
   //setup melody and pin 13 (test led)
+  do
+  {
+    notebuffer[noteindex] = pgm_read_word_near(melodycode + noteindex);
+    noteindex++;
+  }while(noteindex<8 && notebuffer[noteindex-1]!=' ');
+  notebuffer[noteindex] = '\0';
   melody.setup();
   
   //clear TCCR1
@@ -69,8 +81,6 @@ void setup() {
 
   //allow interrupts
   sei();
-
-  Serial.begin(9600);
 }
 
 /****************************************************************************/
@@ -81,7 +91,19 @@ void setup() {
 ISR(TIMER1_COMPA_vect){
   //onTick() takes 215us at worst to finish
   //  -> ok to be put in interrupt function
-  melody.onTick();
+
+  melody.onTick(notebuffer);
+  if(!melody.refreshed())
+    return;
+
+  unsigned char i=0;
+  do
+  {
+    notebuffer[i] = pgm_read_word_near(melodycode + noteindex);
+    noteindex++;
+    i++;
+  }while(noteindex < notesize && i<8 && notebuffer[i-1]!=' '&& notebuffer[i-1]!='\0');
+  notebuffer[i] = '\0';
 }
 
 /****************************************************************************/
