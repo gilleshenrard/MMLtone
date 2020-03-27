@@ -177,6 +177,7 @@ int MMLtone::onTick()
 
     //set the number of ticks
     // (nb of ticks = nb of 1/64 notes to reach proper duration)
+    // + rounds up the number of ticks to a divisor of 64 (int division)
     this->m_nbtick = 64 / duration;
 
     //decode dotted note (duration * 1.5)
