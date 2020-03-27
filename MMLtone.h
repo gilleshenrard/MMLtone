@@ -11,15 +11,12 @@ class MMLtone
       bool            isStarted;
       bool            cut_note;
       bool            isRefreshed;
-      char*           m_curNote;
-      char*           m_nextNote;
-      char*           m_music;
       unsigned char   m_octave;
       unsigned char   m_nbtick;
       unsigned char   m_duration;
 
   public:
-      MMLtone(unsigned char Pin, const char* music);
+      MMLtone(unsigned char Pin);
       ~MMLtone();
       void setup();
       void start();

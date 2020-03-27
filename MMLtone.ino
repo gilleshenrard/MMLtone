@@ -40,7 +40,7 @@ const char melodycode[] PROGMEM = {"4D4 G2 G8 B8 A8 B8 G2./ G4 A2/ A8/ A8 G8 A8 
 char notebuffer[8] = {0};
 unsigned char noteindex = 0, notesize=95;
 
-MMLtone melody = MMLtone(12, "4D4 G2 G8 B8 A8 B8 G2./ G4 A2/ A8/ A8 G8 A8 B4 G4/ G4 D4 G2 G8 B8 A8 B8 G2. B4 A4 5C4 4B4 A4 G4");
+MMLtone melody = MMLtone(12);
 
 
 /****************************************************************************/
@@ -89,8 +89,8 @@ void setup() {
 /*  O : /                                                                   */
 /****************************************************************************/
 ISR(TIMER1_COMPA_vect){
-  //onTick() takes 215us at worst to finish
-  //  -> ok to be put in interrupt function
+  //onTick() witout refresh : 20 us max
+  //onTick() with refresh : 284 us max
 
   melody.onTick(notebuffer);
   if(!melody.refreshed())
