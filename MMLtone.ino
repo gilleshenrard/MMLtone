@@ -82,9 +82,10 @@ void setup() {
 /*  O : /                                                                   */
 /****************************************************************************/
 ISR(TIMER1_COMPA_vect){
-  //timing tests (in microseconds) : 
-  //20 <= onTick() + getNextNote() <= 280
-
+  //timing tests (in microseconds) :
+  //4  <= getNextNote() <= 16
+  //16 <=   onTick()    <= 280
+  
   melody.getNextNote();
   melody.onTick();
 }
