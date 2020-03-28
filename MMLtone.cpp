@@ -203,7 +203,7 @@ int MMLtone::onTick()
 /*  O : /                                                       */
 /****************************************************************/
 void MMLtone::getNextNote(){
-  if(this->m_index>0 && !this->isRefreshed)
+  if((this->m_index>0 && !this->isRefreshed) || this->m_index >= this->m_size)
     return;
   
   unsigned char i=0;
