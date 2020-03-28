@@ -53,6 +53,7 @@ void setup() {
   Serial.begin(9600);
   
   //setup melody and pin 13 (test led)
+  pinMode(LED_BUILTIN, OUTPUT);
   melody.setup();
   
   //clear TCCR1
@@ -94,6 +95,9 @@ ISR(TIMER1_COMPA_vect){
 /*  O : /                                                                   */
 /****************************************************************************/
 void loop() {
+    if(melody.last())
+      digitalWrite(LED_BUILTIN, HIGH);
+  
     if(melody.finished())
       melody.stop();
     else

@@ -8,18 +8,19 @@ class MMLtone
 { 
   private:
       unsigned char   pin;
+      unsigned char   m_octave;
+      unsigned char   m_nbtick;
+      unsigned char   m_duration;
+      unsigned char   m_next;
+      unsigned char   m_current;
+      unsigned char   m_size;
+      char            m_buffer[NOTBUFSZ];
+      char*           m_code;
       bool            isFinished;
       bool            lastnote;
       bool            isStarted;
       bool            cut_note;
       bool            isRefreshed;
-      unsigned char   m_octave;
-      unsigned char   m_nbtick;
-      unsigned char   m_duration;
-      unsigned char   m_index;
-      unsigned char   m_size;
-      char            m_buffer[NOTBUFSZ];
-      char*           m_code;
 
   public:
       MMLtone(const unsigned char Pin, const char* code, const unsigned char siz);

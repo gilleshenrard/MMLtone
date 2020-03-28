@@ -8,7 +8,7 @@
  * O : /                                                        *
  ****************************************************************/
 MMLtone::MMLtone(const unsigned char Pin, const char* code, const unsigned char siz)
-:isFinished(false), lastnote(false), isStarted(false), cut_note(false), isRefreshed(false), m_octave(0), m_nbtick(0), m_duration(0), m_index(0), m_buffer{0}
+:isFinished(false), lastnote(false), isStarted(false), cut_note(false), isRefreshed(false), m_octave(0), m_nbtick(0), m_duration(0), m_next(0), m_current(0), m_buffer{0}
 {
   this->pin = Pin;
   this->m_code = code;
@@ -67,6 +67,16 @@ int MMLtone::onTick()
         this->m_nbtick--;
         return 0;
     }
+
+    //if last note has been played, set the finished flag
+    if(this->m_current == this->m_next){
+      this->isFinished = true;
+      return 0;
+    }
+
+    //if last note has been reached, set the last note flag
+    if(this->m_next >= this->m_size)
+      this->lastnote = true;
 
 
     //NOTE DECODING
@@ -203,18 +213,26 @@ int MMLtone::onTick()
 /*  O : /                                                       */
 /****************************************************************/
 void MMLtone::getNextNote(){
-  if((this->m_index>0 && !this->isRefreshed) || this->m_index >= this->m_size)
+  //if note is not to be refreshed, exit
+  if(this->m_next>0 && !this->isRefreshed)
     return;
-  
-  unsigned char i=0;
+
+  //update current note index
+  this->m_current = this->m_next;
+
+  //if last byte of the MML code has already been read, exit
+  if(this->m_next >= this->m_size)
+    return;
 
   //read the EEPROM memory byte by byte to retrieve the next note
+  //  and put the note in the buffer
+  unsigned char i=0;
   do
   {
-    this->m_buffer[i] = pgm_read_word_near(this->m_code + this->m_index);
-    this->m_index += 1;
+    this->m_buffer[i] = pgm_read_word_near(this->m_code + this->m_next);
+    this->m_next++;
     i++;
-  }while(this->m_index < this->m_size && i<NOTBUFSZ && this->m_buffer[i-1]!=' '&& this->m_buffer[i-1]!='\0');
+  }while(this->m_next < this->m_size && i<NOTBUFSZ && this->m_buffer[i-1]!=' '&& this->m_buffer[i-1]!='\0');
   this->m_buffer[i] = '\0';
 }
 
@@ -236,6 +254,8 @@ void MMLtone::stop(){
 void MMLtone::reset(){
   this->lastnote=false;
   this->isFinished=false;
+  this->m_next = 0;
+  this->m_current = 0;
 }
 
 /****************************************************************
