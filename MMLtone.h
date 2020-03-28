@@ -22,7 +22,7 @@ class MMLtone
       char*           m_code;
 
   public:
-      MMLtone(unsigned char Pin, const char* code, const unsigned char siz);
+      MMLtone(const unsigned char Pin, const char* code, const unsigned char siz);
       ~MMLtone();
       void setup();
       void start();

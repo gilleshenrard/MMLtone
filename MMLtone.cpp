@@ -7,7 +7,7 @@
  * P : Builds a new MMLtone module                              *
  * O : /                                                        *
  ****************************************************************/
-MMLtone::MMLtone(unsigned char Pin, const char* code, const unsigned char siz)
+MMLtone::MMLtone(const unsigned char Pin, const char* code, const unsigned char siz)
 :isFinished(false), lastnote(false), isStarted(false), cut_note(false), isRefreshed(false), m_octave(0), m_nbtick(0), m_duration(0), m_index(0), m_buffer{0}
 {
   this->pin = Pin;
