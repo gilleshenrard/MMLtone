@@ -1,4 +1,5 @@
 #include "MMLtone.h"
+#include <Arduino.h>
 
 /****************************************************************
  * I : Pin on which the buzzer is plugged                       *

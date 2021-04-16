@@ -1,6 +1,5 @@
 #ifndef MUSIC_H_INCLUDED
 #define MUSIC_H_INCLUDED
-#include <Arduino.h>
 
 #define NOTBUFSZ 8
 
