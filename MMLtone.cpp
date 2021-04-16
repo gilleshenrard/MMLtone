@@ -1,10 +1,40 @@
+/*
+ * MMLtone.cpp
+ * -----------------------------------------------
+ * Library used to handle MML (Music Macro Language) coding.
+ * This library is used to play (with the Arduino instruction Tone()) music
+ *    which has been coded as a string.
+ * 
+ * The library provides two main methods :
+ * - getNextNote() reads the next note to be played and keeps it in a buffer
+ * - onTick() decodes the note read by getNextNote() and plays it.
+ * 
+ * Both methods are to be put in a portion of code executed with a timer, or enclosed with a millis() mechanism
+ * The timer interval has to be set as the length of a 1/64 note.
+ * 
+ * Notes are to be separated with a space character and are presented as such :
+ * 4D8#./
+ *  - A number (0 to 8) before the note indicates in which octave the note is.
+ *    The same octave will be used in all the notes until a new one is specified. This is facultative.
+ *  - The note itself is coded with the american naming scheme (A to G)
+ *  - A number after a note indicates its value/duration. Here a 8 means it's an eighth note (1/8 whole note).
+ *    This has to be a power of two and cannot exceed 32
+ *  - A # or a + means it's a sharp note (a semitone higher), and a - means it's a flat note (a semitone lower)
+ *  - A . means it's a dotted note. It adds another half of the note’s duration to it.
+ *  - A / induces a clear-cut bewteen two notes. This is to make sure a separation is heard between notes
+ *  
+ * -----------------------------------------------
+ *  Author : Gilles Henrard
+ *  Last edit date : 16/04/2021
+ */
+
 #include "MMLtone.h"
 #include "pitches.h"
 #include <Arduino.h>
 
 /****************************************************************
  * I : Pin on which the buzzer is plugged                       *
- *     Pointer to the MML code array                            *
+ *     Pointer to the MML string                                *
  *     Size of the code array (sizeof())                        *
  * P : Builds a new MMLtone module                              *
  * O : /                                                        *
@@ -56,8 +86,11 @@ int MMLtone::onTick()
       return 0;
 
     //if note is to be cut, noTone() during the last tick
+    //  otherwise, clear the flag
     if(this->cut_note && this->m_nbtick == 1)
       noTone(this->pin);
+    else
+      this->cut_note = false;
 
     //on first tick, clear the flag indicating next note is to be decoded
     if(this->m_nbtick >= (64 / this->m_duration) - 1)
@@ -80,24 +113,62 @@ int MMLtone::onTick()
     if(this->m_next >= this->m_size)
       this->lastnote = true;
 
+    ///////////////////////////////////////////////////////////////////////////////
+    //                           NOTE DECODING                                   //
+    ///////////////////////////////////////////////////////////////////////////////
 
-    //NOTE DECODING
-
-    //get the code for the current note + declare all variables
+    //place the note code iterator + declare all variables
     char* it = this->m_buffer;
     unsigned char duration = 0, note = 0;
-    
-    //reinitialise the note cut flag
-    this->cut_note = false;
 
-    //decode eventual octave change
+    //if octave changes, decode
     if(isdigit(*it))
     {
         this->m_octave = *it - 48; //translate ASCII to number ('0' = 48)
         it++;
     }
 
-    note = (toupper(*it) - 'A') + (12 * this->m_octave);
+    //compute the note code (12 semi-tones per octave + place of the note in the octave)
+    //  (octaves are coded starting with A instead of C)
+    switch(*it){
+      case 'A':
+      case 'a':
+          note = TYP_A + (this->m_octave * 12);
+          break;
+          
+      case 'B':
+      case 'b':
+          note = TYP_B + (this->m_octave * 12);
+          break;
+          
+      case 'C':
+      case 'c':
+          note = TYP_C + ((this->m_octave - 1) * 12);
+          break;
+          
+      case 'D':
+      case 'd':
+          note = TYP_D + ((this->m_octave - 1) * 12);
+          break;
+          
+      case 'E':
+      case 'e':
+          note = TYP_E + ((this->m_octave - 1) * 12);
+          break;
+          
+      case 'F':
+      case 'f':
+          note = TYP_F + ((this->m_octave - 1) * 12);
+          break;
+          
+      case 'G':
+      case 'g':
+          note = TYP_G + ((this->m_octave - 1) * 12);
+          break;
+
+      default:
+          break;
+    }
     it++;
 
     //decode sharp or flat notes
@@ -117,9 +188,9 @@ int MMLtone::onTick()
     tone(this->pin, this->getFrequency(note));
     this->isRefreshed = true;
 
-
-
-    //DURATION DECODING
+    ///////////////////////////////////////////////////////////////////////////////
+    //                           DURATION DECODING                               //
+    ///////////////////////////////////////////////////////////////////////////////
 
     //decode note duration (possible 2 digits)
     if(isdigit(*it))
@@ -255,8 +326,8 @@ bool MMLtone::refreshed()
 
 /****************************************************************
  * I : Index of a note compared to the A at the octave 0        *
- *        e.g. : C@2 = 1 octave + diff between A1 and C2        *
- *                   = 12 + 3 = 15                              *
+ *        e.g. : C@3 = 2 octaves + place of C in the octave     *
+ *                   = 2*12 + 3 = 27                            *
  * P : Get the corresponding frequency for a note               *
  * O : Frequency of the note                                    *
  ****************************************************************/
