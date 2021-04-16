@@ -27,6 +27,7 @@ class MMLtone
       void setup();
       void start();
       int onTick();
+      float getFrequency(const unsigned char note);
       void getNextNote();
       void stop();
       void reset();
