@@ -85,8 +85,7 @@ int MMLtone::onTick()
 
     //get the code for the current note + declare all variables
     char* it = this->m_buffer;
-    float frequency;
-    unsigned char duration = 0;
+    unsigned char duration = 0, note = 0;
     
     //reinitialise the note cut flag
     this->cut_note = false;
@@ -98,70 +97,24 @@ int MMLtone::onTick()
         it++;
     }
 
-    //set the base freq. for the note requested (octave 0 @ A440 by default)
-    switch(*it)
-    { 
-      case 'C':
-      case 'c':
-        frequency = 16.35;
-        break;
-      
-      case 'D':
-      case 'd':
-        frequency = 18.35;
-        break;
-      
-      case 'E':
-      case 'e':
-        frequency = 20.6;
-        break;
-      
-      case 'F':
-      case 'f':
-        frequency = 21.83;
-        break;
-      
-      case 'G':
-      case 'g':
-        frequency = 24.5;
-        break;
-
-      case 'A':
-      case 'a':
-        frequency = 27.5;
-        break;
-      
-      case 'B':
-      case 'b':
-        frequency = 30.87;
-        break;
-      
-      case 'R':
-      case 'r':
-      default:
-        frequency = 0.0;
-        break;
-    }
-
-    //multiply the freq. to get the right octave (freq * 2 ^ octave)
-    frequency *= (float)(1 << this->m_octave);
+    note = (toupper(*it) - 'A') + (12 * this->m_octave);
     it++;
 
     //decode sharp or flat notes
     if ((*it == '#') || (*it =='+'))
     {
-        frequency *= 1.059;
+        note++;
         it++;
     }
     if (*it == '-')
     {
-        frequency *= 0.9443; // = div 1.059
+        note--;
         it++;
     }
 
     //play the note
     // + set the flag to decode next note on 2nd tick
-    tone(this->pin, frequency);
+    tone(this->pin, this->getFrequency(note));
     this->isRefreshed = true;
 
 
@@ -195,7 +148,7 @@ int MMLtone::onTick()
     //decode dotted note (duration * 1.5)
     if (*it == '.')
     {
-        this->m_nbtick = (unsigned char)((float)this->m_nbtick * 1.5);
+        this->m_nbtick += this->m_nbtick >> 1;
         it++;
     }
 
@@ -307,7 +260,7 @@ bool MMLtone::refreshed()
  * P : Get the corresponding frequency for a note               *
  * O : Frequency of the note                                    *
  ****************************************************************/
-float getFrequency(const unsigned char note){
+float MMLtone::getFrequency(const unsigned char note){
   switch(note){
     case NOTE_A0:     // A @ octave 0
       return 27.50;
