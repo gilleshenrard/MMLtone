@@ -5,19 +5,32 @@
  * This library is used to play (with the Arduino instruction Tone()) music
  *    which has been coded as a string.
  * 
+ * The string containing the MML code must be stored as PROGMEM in order to save RAM.
+ * Also, the library has been designed to be as lightweight as possible in terms of RAM and execution time.
+ * There is no floating point calculations and no array used, and all the frequencies are precomputed.
+ * The cost in terms of stack could be improved, though.
+ * 
  * The library provides two main methods :
  * - getNextNote() reads the next note to be played and keeps it in a buffer
  * - onTick() decodes the note read by getNextNote() and plays it.
  * 
  * Both methods are to be put in a portion of code executed with a timer, or enclosed with a millis() mechanism
- * The timer interval has to be set as the length of a 1/64 note.
+ * The timer interval has to be set as the length of a 1/64 note. This is reffered to as a clock tick.
+ * While getNextNote() belongs in the clock tick code portion, it will be executed only on the second tick of
+ * each note in order to flatten the execution time. This is why, as the tick is set to a 1/64 note, the minimum
+ * length of a note can only be 1/32.
  * 
  * Notes are to be separated with a space character and are presented as such :
- * 4D8#./
+ *    4D16#./
+ * 
  *  - A number (0 to 8) before the note indicates in which octave the note is.
- *    The same octave will be used in all the notes until a new one is specified. This is facultative.
+ *    The same octave will be used in all the notes until a new one is specified. This is facultative
+ *    once set on first note.
  *  - The note itself is coded with the american naming scheme (A to G)
- *  - A number after a note indicates its value/duration. Here a 8 means it's an eighth note (1/8 whole note).
+ *  - A number after a note indicates its value/duration. Here a 16 means it's an eighth note (1/16 whole note,
+ *    or 4 ticks).
+ *    The same duration will be used in all the notes until a new one is specified. This is facultative
+ *    once set on first note.
  *    This has to be a power of two and cannot exceed 32
  *  - A # or a + means it's a sharp note (a semitone higher), and a - means it's a flat note (a semitone lower)
  *  - A . means it's a dotted note. It adds another half of the note’s duration to it.
@@ -40,7 +53,8 @@
  * O : /                                                        *
  ****************************************************************/
 MMLtone::MMLtone(const unsigned char Pin, const char* code, const unsigned char siz)
-:isFinished(false), lastnote(false), isStarted(false), cut_note(false), isRefreshed(false), m_octave(0), m_nbtick(0), m_duration(0), m_next(0), m_current(0), m_buffer{0}
+:isFinished(false), lastnote(false), isStarted(false), cut_note(false), isRefreshed(false),
+  m_octave(0), m_nbtick(0), m_duration(0), m_next(0), m_current(0), m_buffer{0}
 {
   this->pin = Pin;
   this->m_code = code;
@@ -86,11 +100,8 @@ int MMLtone::onTick()
       return 0;
 
     //if note is to be cut, noTone() during the last tick
-    //  otherwise, clear the flag
     if(this->cut_note && this->m_nbtick == 1)
       noTone(this->pin);
-    else
-      this->cut_note = false;
 
     //on first tick, clear the flag indicating next note is to be decoded
     if(this->m_nbtick >= (64 / this->m_duration) - 1)
@@ -112,6 +123,9 @@ int MMLtone::onTick()
     //if last note has been reached, set the last note flag
     if(this->m_next >= this->m_size)
       this->lastnote = true;
+
+    //clear the clear-cut flag
+    this->cut_note = false;
 
     ///////////////////////////////////////////////////////////////////////////////
     //                           NOTE DECODING                                   //
@@ -204,8 +218,8 @@ int MMLtone::onTick()
       it++;
     }
 
-    //if none specified, reuse last specified
-    //otherwise, update duration
+    //if no duration specified for current note, reuse last specified
+    //otherwise, update notes duration
     if(!duration)
       duration = this->m_duration;
     else
@@ -213,7 +227,6 @@ int MMLtone::onTick()
 
     //set the number of ticks
     // (nb of ticks = nb of 1/64 notes to reach proper duration)
-    // + rounds up the number of ticks to a divisor of 64 (int division)
     this->m_nbtick = 64 / duration;
 
     //decode dotted note (duration * 1.5)
