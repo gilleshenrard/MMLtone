@@ -3,23 +3,24 @@
 /*
  * Devices used during tests :
  *  - 1 x Arduino Nano V3 / Atmega 328p-au
- *  - 1 x buzzer (part number unknown)
- *  - 1 x 2.2k Ohms resistor (current limitation)
- *  - 1 x 10k Ohms resistor (pull-down)
- *  - 1 x N-channel MOSFET (P3NK507)
+ *  - 1 x piezoelectric buzzer w/o oscillator (GPC3010YB-5V)
+ *  - 1 x TC4428 IC
+ *  - 1 x 9V battery (to power the Arduino)
  * 
  * Music library testing procedure
  * --------------------------------
- *      MOSFET pins   |   
+ *      TC4428	      |   
  *      --------------|------------------
- *      Drain : 1     |   Arduino : D12, Atmega : 16 (+ pull-down to GND in //)
- *      Gate  : 2     |   buzzer -
- *      Source: 3     |   GND
+ *      IN_A    : 2   |   Arduino : D12, Atmega : 16 (PB4)
+ *      GND     : 3   |   GND
+ *      IN_B    : 4   |   Arduino : D12, Atmega : 16 (PB4)
+ *      OUT_B   : 5   |   buzzer
+ *      Vdd     : 6   |   +9V
+ *      ~OUT_A  : 7   |   buzzer
  *      
  *      Buzzer pins   |
  *      --------------|------------------------------------
- *      -             |   MOSFET : 2
- *      +             |   VCC (via 2.2k resistor in series)
+ *                    |   Each on the TC4428 outputs
  */
 
 //timer1 values with 16 MHz crystal
