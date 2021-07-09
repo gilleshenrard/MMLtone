@@ -49,8 +49,6 @@ MMLtone melody = MMLtone(12, melodycode, sizeof(melodycode));
 void setup() {
   //stop interrupts
   cli();
-
-  Serial.begin(9600);
   
   //setup melody and pin 13 (test led)
   pinMode(LED_BUILTIN, OUTPUT);
@@ -82,9 +80,9 @@ void setup() {
 /*  O : /                                                                   */
 /****************************************************************************/
 ISR(TIMER1_COMPA_vect){
-  //timing tests (in microseconds) :
+  //timing tests (w/ 16KHz crystal, in microseconds) :
   //4  <= getNextNote() <= 16
-  //16 <=   onTick()    <= 280
+  //20 <=   onTick()    <= 256
   
   melody.getNextNote();
   melody.onTick();

@@ -339,6 +339,7 @@ bool MMLtone::refreshed()
 
 /****************************************************************
  * I : Index of a note compared to the A at the octave 0        *
+ *     Indexes are declared in pitches.h                        *
  *        e.g. : C@3 = 2 octaves + place of C in the octave     *
  *                   = 2*12 + 3 = 27                            *
  * P : Get the corresponding frequency for a note               *

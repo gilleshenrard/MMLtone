@@ -21,13 +21,16 @@ class MMLtone
       bool            cut_note;             //flag indicating whether there is a clear-cut in the note
       bool            isRefreshed;          //flag indicating whether the next note is to be read
 
+  protected:
+    //declared as inline to avoid function calls and speed up process
+    inline float getFrequency(const unsigned char note) __attribute__((always_inline));
+
   public:
       MMLtone(const unsigned char Pin, const char* code, const unsigned char siz);
       ~MMLtone();
       void setup();
       void start();
       int onTick();
-      float getFrequency(const unsigned char note);
       void getNextNote();
       void stop();
       void reset();
